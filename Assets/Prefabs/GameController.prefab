@@ -43,8 +43,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e7289e8ebc46e547a1720017a101cfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfPlayerMoves: 0
-  playerMoves: 0
-  numberOfZombieMoves: 0
-  zombieMoves: 0
   state: 0
+  numberOfPlayerMoves: 3
+  numberOfZombieMoves: 2
+  zombieMoves: 0
+  survivorsCollected: 0
+  survivorsKilled: 0
+  numberOfZombies: 1
+  numberOfZombiesMod: 0
+  numberOfSurvivors: 1
+  xGridSize: 32
+  yGridSize: 32
+  gameStarted: 0
+  gameOver: 0
+  paused: 0
+  roundOver: 0
+  playerDead: 0
+  survivorText: {fileID: 4023541070362948625, guid: c8ec4fd6b82e461448113d920293f942,
+    type: 3}
+  pausedText: {fileID: 4675174107103721897, guid: 6132b7f8b922ac54198fec567ff3bc88,
+    type: 3}
+  turnIndicators:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  menuScreen: {fileID: 0}
+  portal: {fileID: 3677369317196012733, guid: da5120ab8cf22154b93fe35207351a90, type: 3}
+  menuScreenText: {fileID: 0}
+  zombie: {fileID: 795318790504672165, guid: 5e4375e070e0eca4bb14e95511fea444, type: 3}
+  survivor: {fileID: 6963490271147250772, guid: aabe4ce83807175468c6a76e27e1e0a8,
+    type: 3}

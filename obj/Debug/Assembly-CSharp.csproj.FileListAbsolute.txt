@@ -1,0 +1,2 @@
+D:\Dev\repos\ZombieTag\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
+D:\Dev\repos\ZombieTag\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache

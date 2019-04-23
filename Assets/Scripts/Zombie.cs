@@ -7,23 +7,20 @@ public class Zombie : MonoBehaviour
     [SerializeField]
     Waypoint startWaypoint, endWaypoint;
 
-    public GameObject node;
-
-    public enum Type { Blinky, Pinky, Inky, Clyde, };
+    public enum Type { Blinky = 0, Pinky = 1, Inky = 2, };
     public Type type;
 
-    public Color color;
-    public Transform target;
+    private Transform target;
     public Transform selectedSurvivor;
-    private GameController gc;
     private Waypoint searchCenter;
 
     private bool moving;
-    public bool isRunning = true;
+    private bool isRunning = true;
 
     private Queue<Waypoint> queue = new Queue<Waypoint>();
     private Waypoint[] waypoints;
-    private Survivor[] survivors;
+    private Survivor[] survivorsInGame;
+    private List<Survivor> survivors = new List<Survivor>();
     private Dictionary<Vector2Int, Waypoint> grid = new Dictionary<Vector2Int, Waypoint>();
     private List<Waypoint> path = new List<Waypoint>();
 
@@ -31,46 +28,40 @@ public class Zombie : MonoBehaviour
 
     private void Awake()
     {
-        gc = FindObjectOfType<GameController>();
-        
-        if(type == Type.Blinky)
-        {
-            color = Color.red;
-        }
-        else if (type == Type.Pinky)
-        {
-            color = Color.magenta;
-        }
-        else if (type == Type.Inky)
-        {
-            survivors = FindObjectsOfType<Survivor>();
-            int ind = Random.Range(0, survivors.Length);
-            selectedSurvivor = survivors[ind].transform;
-            color = Color.blue;
-        }
-        else if (type == Type.Clyde)
-        {
-            survivors = FindObjectsOfType<Survivor>();
-            int ind = Random.Range(0, survivors.Length);
-            selectedSurvivor = survivors[ind].transform;
-            color = Color.green; 
-        }
+        int index = Random.Range(0, 3);
+        type = (Type)index;
+        target = FindObjectOfType<Player>().transform;
+    }
+
+    private void Start()
+    {
+        survivorsInGame = FindObjectsOfType<Survivor>();
+        FindSurvivors();
     }
 
     public IEnumerator Move()
     {
+        if (endWaypoint != null && transform.position == new Vector3(endWaypoint.GridPos.x, endWaypoint.GridPos.y, 0f))
+        {
+            FindSurvivors();
+        }
+
         ClearInfo();
         CreateGrid();
         CheckPositions();
         BreadthFirstSearch();
         CreatePath();
+        moving = true;
 
         int moves = 0;
-        while(moves < gc.numberOfZombieMoves)
+
+        while (moves < GameController.instance.numberOfZombieMoves && moving)
         {
-            if(new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)) == endWaypoint.GridPos)
+            yield return new WaitForSeconds(.5f);
+
+            if (new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)) == endWaypoint.GridPos)
             {
-                // skip
+                moving = false;
             }
             else
             {
@@ -78,12 +69,32 @@ public class Zombie : MonoBehaviour
             }
 
             moves++;
-            gc.zombieMoves++;
-
-            yield return new WaitForSeconds(.5f);
+            GameController.instance.zombieMoves++;           
         }
 
         moving = false;
+    }
+
+    private void FindSurvivors()
+    {
+        selectedSurvivor = null;
+        survivors.Clear();
+        bool survivorsAvailable = false;
+
+        foreach(Survivor surv in survivorsInGame)
+        {
+            if (surv.gameObject.activeInHierarchy)
+            {
+                survivors.Add(surv);
+                survivorsAvailable = true;
+            }
+        }
+
+        if(survivors != null && survivorsAvailable)
+        {
+            int ind = Random.Range(0, survivors.Count);
+            selectedSurvivor = survivors[ind].transform;
+        }
     }
 
     private void CheckPositions()
@@ -100,13 +111,6 @@ public class Zombie : MonoBehaviour
             targetPos = new Vector2Int(Mathf.RoundToInt(target.GetComponent<Player>().facingDirection.x), Mathf.RoundToInt(target.GetComponent<Player>().facingDirection.y));
         }
         else if (type == Type.Inky)
-        {
-            Vector3 dist = selectedSurvivor.position - new Vector3(target.position.x, target.position.y, 0f).normalized;
-            Vector3 tar = new Vector3(target.position.x, target.position.y, 0f) + dist;
-            Debug.Log(tar);
-            targetPos = new Vector2Int(Mathf.RoundToInt(tar.x), Mathf.RoundToInt(tar.y));
-        }
-        else
         {
             targetPos = new Vector2Int(Mathf.RoundToInt(selectedSurvivor.position.x), Mathf.RoundToInt(selectedSurvivor.position.y));
         }
@@ -125,9 +129,9 @@ public class Zombie : MonoBehaviour
                 if (entry.Value.GridPos == targetPos)
                 {
                     endWaypoint = entry.Value;
-                    GameObject _node = Instantiate(node, new Vector2(targetPos.x, targetPos.y), Quaternion.identity);
-                    _node.GetComponent<SpriteRenderer>().color = color;
-                    Destroy(_node.gameObject, 2f);
+                    //GameObject _node = Instantiate(node, new Vector2(targetPos.x, targetPos.y), Quaternion.identity);
+                    //_node.GetComponent<SpriteRenderer>().color = color;
+                    //Destroy(_node.gameObject, 2f);
                 }
             }
         }
@@ -151,15 +155,6 @@ public class Zombie : MonoBehaviour
     {
         if(path.Count > 0)
         {
-            startWaypoint = null;
-            endWaypoint = null;
-
-            foreach (Waypoint waypoint in path)
-            {
-                waypoint.isExplored = false;
-                waypoint.exploredFrom = null;
-            }
-
             isRunning = true;
             grid.Clear();
             path.Clear();
@@ -224,14 +219,25 @@ public class Zombie : MonoBehaviour
 
     private void CreateGrid()
     {
-        for (int i = -Mathf.RoundToInt(gc.xGridSize / 2) + 1; i < (gc.xGridSize / 2) + 1; i++)
+        for (int i = -Mathf.RoundToInt(GameController.instance.xGridSize / 2) - 1; i < (GameController.instance.xGridSize / 2); i++)
         {
-            for (int j = -Mathf.RoundToInt(gc.xGridSize / 2) + 1; j < (gc.yGridSize / 2) + 1; j++)
+            for (int j = -Mathf.RoundToInt(GameController.instance.yGridSize / 2) - 1; j < (GameController.instance.yGridSize / 2); j++)
             {
                 Waypoint _waypoint = new Waypoint(false, null, new Vector2Int(i, j));
                 grid.Add(new Vector2Int(i, j), _waypoint);
             }
         }
-        Debug.Log("New Grid Loaded for " + transform.name);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag == "Survivor")
+        {
+            collision.gameObject.SetActive(false);
+            moving = false;
+            StartCoroutine(GameController.instance.SurvivorKilled());
+            GameController.instance.numberOfZombiesMod++;
+            GameController.instance.survivorsKilled++;
+        }
     }
 }
