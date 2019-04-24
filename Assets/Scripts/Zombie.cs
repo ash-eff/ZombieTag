@@ -10,6 +10,7 @@ public class Zombie : MonoBehaviour
     public enum Type { Blinky = 0, Pinky = 1, Inky = 2, };
     public Type type;
 
+    private Animator anim;
     private Transform target;
     public Transform selectedSurvivor;
     private Waypoint searchCenter;
@@ -31,6 +32,7 @@ public class Zombie : MonoBehaviour
         int index = Random.Range(0, 3);
         type = (Type)index;
         target = FindObjectOfType<Player>().transform;
+        anim = GetComponent<Animator>();
     }
 
     private void Start()
@@ -58,6 +60,37 @@ public class Zombie : MonoBehaviour
         while (moves < GameController.instance.numberOfZombieMoves && moving)
         {
             yield return new WaitForSeconds(.5f);
+
+            Vector3 direction = (new Vector3(path[moves + 1].GridPos.x, path[moves + 1].GridPos.y, 0f) - transform.position).normalized;
+            Debug.Log(direction);
+            if(direction == Vector3.up)
+            {
+                anim.SetBool("Up", true);
+                anim.SetBool("Right", false);
+                anim.SetBool("Down", false);
+                anim.SetBool("Left", false);
+            }
+            if (direction == Vector3.right)
+            {
+                anim.SetBool("Right", true);
+                anim.SetBool("Up", false);
+                anim.SetBool("Down", false);
+                anim.SetBool("Left", false);
+            }
+            if (direction == -Vector3.up)
+            {
+                anim.SetBool("Down", true);
+                anim.SetBool("Up", false);
+                anim.SetBool("Right", false);
+                anim.SetBool("Left", false);
+            }
+            if (direction == -Vector3.right)
+            {
+                anim.SetBool("Left", true);
+                anim.SetBool("Up", false);
+                anim.SetBool("Right", false);
+                anim.SetBool("Down", false);
+            }
 
             if (new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)) == endWaypoint.GridPos)
             {
@@ -234,10 +267,11 @@ public class Zombie : MonoBehaviour
         if(collision.tag == "Survivor")
         {
             collision.gameObject.SetActive(false);
-            moving = false;
-            StartCoroutine(GameController.instance.SurvivorKilled());
+            moving = false;           
             GameController.instance.numberOfZombiesMod++;
             GameController.instance.survivorsKilled++;
+            GameController.instance.remainingSurvivors--;
+            StartCoroutine(GameController.instance.GameMessage("You lost a survivor!"));
         }
     }
 }

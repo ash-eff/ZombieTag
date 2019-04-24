@@ -87,6 +87,8 @@ public class Player : MonoBehaviour
             collision.gameObject.SetActive(false);
             GameController.instance.survivorsCollected++;
             GameController.instance.totalSurvivorsCollected++;
+            GameController.instance.remainingSurvivors--;
+            StartCoroutine(GameController.instance.GameMessage("You saved a survivor!"));
         }
         if (collision.tag == "Zombie")
         {          

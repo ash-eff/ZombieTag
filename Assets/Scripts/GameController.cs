@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
@@ -16,6 +17,7 @@ public class GameController : MonoBehaviour
     public int numberOfZombieMoves;
     public int zombieMoves;
     public int totalSurvivorsCollected;
+    public int remainingSurvivors;
     public int survivorsCollected;
     public int survivorsKilled;
 
@@ -37,19 +39,27 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI pausedText;
     [SerializeField]
-    private TextMeshProUGUI survivorDeadText;
+    private TextMeshProUGUI messageSystemText;
     [SerializeField]
     private GameObject[] turnIndicators;
     [SerializeField]
     private GameObject menuScreen;
     [SerializeField]
+    private GameObject stormScreen;
+    [SerializeField]
     private GameObject portal;
+    [SerializeField]
+    private GameObject menuButtonHolder;
     [SerializeField]
     private TextMeshProUGUI menuScreenText;
     [SerializeField]
     private Zombie zombie;
     [SerializeField]
     private Survivor survivor;
+    [SerializeField]
+    private GameObject continueButton;
+    [SerializeField]
+    private GameObject quitButton;
 
     private List<Vector2Int> spawnLocations = new List<Vector2Int>();
 
@@ -73,14 +83,14 @@ public class GameController : MonoBehaviour
             Destroy(gameObject);
         }
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
 
         playerMoves = numberOfPlayerMoves;
     }
 
     private void Start()
     {
-        Debug.Log("Running");
+        remainingSurvivors = numberOfSurvivors;
         SpawnZombies();
         SpawnSurvivors();
         gameStarted = true;
@@ -110,13 +120,15 @@ public class GameController : MonoBehaviour
         {
             if (survivorsKilled == numberOfSurvivors)
             {
-                StartCoroutine(MenuScreen("The survivors all died.\n Game Over."));
+                pausedText.text = "All survivors died.";
+                StartCoroutine(MenuScreen("Game Over."));
                 gameOver = true;
             }
 
             if (playerDead)
             {
-                StartCoroutine(MenuScreen("You were overtaken by zombies.\n Game Over."));
+                pausedText.text = "You were overtaken by zombies.";
+                StartCoroutine(MenuScreen("Game Over."));
                 gameOver = true;
             }
 
@@ -223,11 +235,13 @@ public class GameController : MonoBehaviour
         paused = !paused;
         if (paused)
         {
-            Time.timeScale = 0;
-            pausedText.text = "- Stage Complete -";
+            AudioListener.volume = .25f;
+            Time.timeScale = 0;          
+            pausedText.text = "- Paused -";
         }
         else
         {
+            AudioListener.volume = 1f;
             Time.timeScale = 1;
             pausedText.text = "";
         }
@@ -237,6 +251,7 @@ public class GameController : MonoBehaviour
     {
         survivorsKilled = 0;
         survivorsCollected = 0;
+        remainingSurvivors = numberOfSurvivors;
 
         gameOver = false;
         paused = false;
@@ -263,6 +278,7 @@ public class GameController : MonoBehaviour
         target.GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.None;
         target.GetComponent<SpriteRenderer>().enabled = true;
 
+        TurnGUIReset();
         playerMoves = numberOfPlayerMoves;
         SpawnZombies();
         SpawnSurvivors();
@@ -276,11 +292,14 @@ public class GameController : MonoBehaviour
 
     IEnumerator MenuScreen(string message)
     {
+        yield return new WaitForSeconds(2f);
+        pausedText.text = "";
         menuScreen.SetActive(true);
         menuScreen.GetComponent<Animator>().SetBool("Open", true);
-
         yield return new WaitForSeconds(.5f);
         menuScreenText.text = message;
+        menuButtonHolder.SetActive(true);
+        StartCoroutine(ButtonSelect());
     }
 
     IEnumerator MenuScreenClose()
@@ -314,10 +333,58 @@ public class GameController : MonoBehaviour
         StartCoroutine(ResetLevel());
     }
 
-    public IEnumerator SurvivorKilled()
+    public IEnumerator GameMessage(string message)
     {
-        survivorDeadText.text = "A survivor died!";
+        messageSystemText.text = message;
         yield return new WaitForSecondsRealtime(1);
-        survivorDeadText.text = "";
+        if(remainingSurvivors > 1)
+        {
+            messageSystemText.text = remainingSurvivors.ToString() + " suriviors left.";
+        }
+        else if (remainingSurvivors == 1)
+        {
+            messageSystemText.text = remainingSurvivors.ToString() + " surivior left.";
+        }
+        else
+        {
+            messageSystemText.text = "";
+        }
+        yield return new WaitForSecondsRealtime(1);
+        messageSystemText.text = "";
+    }
+
+    IEnumerator ButtonSelect()
+    {
+        bool selectionMade = false;
+        continueButton.SetActive(true);
+        quitButton.SetActive(false);
+        while (!selectionMade)
+        {
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                continueButton.SetActive(true);
+                quitButton.SetActive(false);
+            }
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                continueButton.SetActive(false);
+                quitButton.SetActive(true);
+            }
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                if (continueButton.activeInHierarchy)
+                {
+                    SceneManager.LoadScene(1);
+                    selectionMade = true;
+                }
+                else
+                {
+                    SceneManager.LoadScene(0);
+                    selectionMade = true;
+                }
+            }
+
+            yield return null;
+        }
     }
 }
