@@ -8,7 +8,9 @@ public class CameraLerp : MonoBehaviour
     float lerpTime = 15f;
     float currentLerpTime;
 
-    float moveDistance = 20f;
+    public float moveDistance = 20f;
+    public Vector3 direction;
+    public bool beforeGame;
 
     Vector3 startPos;
     Vector3 endPos;
@@ -16,14 +18,19 @@ public class CameraLerp : MonoBehaviour
     protected void Start()
     {
         startPos = transform.position;
-        endPos = transform.position + new Vector3(-1,1, 0) * moveDistance;
+        endPos = transform.position + direction * moveDistance;
     }
 
     protected void Update()
     {
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && beforeGame)
         {
             StartGame();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q) && !beforeGame)
+        {
+            SceneManager.LoadScene(0);
         }
 
         currentLerpTime += Time.deltaTime;

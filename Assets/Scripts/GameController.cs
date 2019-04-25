@@ -20,6 +20,7 @@ public class GameController : MonoBehaviour
     public int remainingSurvivors;
     public int survivorsCollected;
     public int survivorsKilled;
+    public int survivorsToWin;
 
     public int numberOfZombies;
     public int numberOfZombiesMod;
@@ -275,6 +276,7 @@ public class GameController : MonoBehaviour
         pausedText.text = "";
 
         Transform target = FindObjectOfType<Player>().transform;
+        target.position = Vector3.zero;
         target.GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.None;
         target.GetComponent<SpriteRenderer>().enabled = true;
 
@@ -313,7 +315,6 @@ public class GameController : MonoBehaviour
 
     IEnumerator EndRound()
     {
-        Time.timeScale = 0;
         gameStarted = false;
         Transform target = FindObjectOfType<Player>().transform;
 
@@ -330,7 +331,15 @@ public class GameController : MonoBehaviour
         pausedText.text = "- " + survivorsKilled.ToString() + " suriviors lost -";
         yield return new WaitForSecondsRealtime(1f);
         Destroy(portalObj);
-        StartCoroutine(ResetLevel());
+        if (totalSurvivorsCollected >= survivorsToWin)
+        {
+            SceneManager.LoadScene(2);
+        }
+        else
+        {
+            Time.timeScale = 0;
+            StartCoroutine(ResetLevel());
+        }
     }
 
     public IEnumerator GameMessage(string message)
