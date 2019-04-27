@@ -1725,12 +1725,12 @@ PrefabInstance:
     - target: {fileID: 5156236416369191156, guid: 2e94d30dcc24314429001683b6bde3f9,
         type: 3}
       propertyPath: numberOfZombies
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5156236416369191156, guid: 2e94d30dcc24314429001683b6bde3f9,
         type: 3}
       propertyPath: numberOfSurvivors
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5156236416369191156, guid: 2e94d30dcc24314429001683b6bde3f9,
         type: 3}
@@ -1765,7 +1765,17 @@ PrefabInstance:
     - target: {fileID: 5156236416369191156, guid: 2e94d30dcc24314429001683b6bde3f9,
         type: 3}
       propertyPath: survivorsToWin
-      value: 1
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5156236416369191156, guid: 2e94d30dcc24314429001683b6bde3f9,
+        type: 3}
+      propertyPath: numberOfPlayerMoves
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5156236416369191156, guid: 2e94d30dcc24314429001683b6bde3f9,
+        type: 3}
+      propertyPath: numberOfZombieMoves
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2e94d30dcc24314429001683b6bde3f9, type: 3}

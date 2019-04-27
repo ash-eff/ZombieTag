@@ -8,9 +8,11 @@ public class Player : MonoBehaviour
 
     private SpriteRenderer spr;
     private Animator anim;
+    private AudioSource pickUp;
 
     private void Awake()
     {
+        pickUp = GetComponent<AudioSource>();
         anim = GetComponent<Animator>();
         GameController.instance = FindObjectOfType<GameController>();
         spr = GetComponent<SpriteRenderer>();
@@ -85,6 +87,7 @@ public class Player : MonoBehaviour
         if(collision.tag == "Survivor")
         {
             collision.gameObject.SetActive(false);
+            pickUp.Play();
             GameController.instance.survivorsCollected++;
             GameController.instance.totalSurvivorsCollected++;
             GameController.instance.remainingSurvivors--;

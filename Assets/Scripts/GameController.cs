@@ -163,10 +163,12 @@ public class GameController : MonoBehaviour
 
             if (state == State.Waiting)
             {
+                pausedText.text = "- waiting -";
                 timer -= Time.deltaTime;
                 if (timer < 0)
                 {
                     TurnGUIReset();
+                    pausedText.text = "";
                     state = State.PlayerTurn;
                 }
             }

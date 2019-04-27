@@ -63,6 +63,7 @@
     <Compile Include="Assets\Scripts\CameraLerp.cs" />
     <Compile Include="Assets\Scripts\CanvasScript.cs" />
     <Compile Include="Assets\Scripts\GameController.cs" />
+    <Compile Include="Assets\Scripts\HelpBubble.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Pointer.cs" />
     <Compile Include="Assets\Scripts\Survivor.cs" />
